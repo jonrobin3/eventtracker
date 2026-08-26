@@ -1,23 +1,12 @@
-#include <chrono>
-#include <condition_variable>
-#include <iostream>
-#include <mutex>
-#include <string>
 #include <thread>
-#include <vector>
 
-#include <curl/curl.h>
-#include <jansson.h>
 #include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
 #include "dbclient.h"
 #include "fetcher.h"
 #include "httpserver.h"
 #include "logger.h"
-#include "pieces.h"
 
 Fetcher *fetcher = nullptr;
 
@@ -59,14 +48,19 @@ int main()
     }
     
     fetcher = new Fetcher();
-    fetcher->start();
+    if (fetcher->start() == false) {
+        exit(1);
+    }
 
     SimpleHttpServer server(8080);
     if (server.init()) {
-        server.start();
+        if (server.start() == false) {
+            exit(1);
+        }
     } else {
         LOG_ERROR("Unable to start http server.");
         fetcher->stop();
+        fetcher->getMyThread()->join();
         exit(1);
     }
 

@@ -12,8 +12,11 @@
 
 class Fetcher {
 public:
+    Fetcher() {
+        mythread = nullptr;
+    }
     void operator()();
-    void start();
+    bool start();
     void stop();
 
     std::thread *getMyThread() {return mythread;}

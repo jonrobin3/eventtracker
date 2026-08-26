@@ -24,8 +24,12 @@ class RateLimiter {
 public:
     void operator()();
     void addTimeout(AddressType type, const std::string &address);
-    void start() {
+    bool start() {
         mythread = new std::thread(std::ref(*this));
+        if (mythread == nullptr) {
+            return false;
+        }
+        return true;
     }
     TimeoutInfo *find(AddressType type, const std::string &address);
     bool checkLimit(const std::string &address, AddressType type);

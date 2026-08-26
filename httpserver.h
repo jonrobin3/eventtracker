@@ -10,14 +10,19 @@
 #include <netinet/in.h>
 
 #include "ratelimiter.h"
+#include "logger.h"
 
 class ClientResponder {
 public:
     void operator()();
-    void start(int clientSocket, RateLimiter *rateLimiter) {
+    bool start(int clientSocket, RateLimiter *rateLimiter) {
         this->clientSocket = clientSocket;
         this->rateLimiter = rateLimiter;
         mythread = new std::thread(std::ref(*this));
+        if (mythread == nullptr) {
+            return false;
+        }
+        return true;
     }
     std::thread *getMyThread() {return mythread;}
     bool fetchpeername(int client_fd, std::string &peername, AddressType &type);
@@ -51,8 +56,13 @@ public:
 
     bool init();
     void operator()();
-    void start() {
+    bool start() {
         mythread = new std::thread(std::ref(*this));
+        if (mythread == nullptr) {
+            LOG_ERROR("Unable to allocate memory for the http server.");
+            return false;
+        }
+        return true;
     }
      std::thread *getMyThread() {return mythread;}
 };

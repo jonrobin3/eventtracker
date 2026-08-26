@@ -126,7 +126,6 @@ void Fetcher::parseResponse(const std::string &resultsJson, std::vector<Pieces *
                     json_decref(root);
                     return;
                 }
-                
 
                 Pieces *newRecord = new Pieces(repoId, pushId, ref, head, before, repoUrl, actorUrl);
                 if (newRecord == NULL) {
@@ -267,7 +266,12 @@ void Fetcher::stop()
     stopCV.notify_one();
 }
 
-void Fetcher::start() {
+bool Fetcher::start() {
     keep_running = 1;
     mythread = new std::thread(std::ref(*this));
+    if (mythread == nullptr) {
+        LOG_ERROR("Unable to allocate memory to run the fetcher.");
+        return false;
+    }
+    return true;
 }

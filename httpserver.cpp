@@ -39,7 +39,13 @@ bool SimpleHttpServer::init() {
 
     LOG_INFO("Starting rate limiter");
     rateLimiter = new RateLimiter();
-    rateLimiter->start();
+    if (rateLimiter) {
+        if (rateLimiter->start() == false) {
+            LOG_ERROR("Unable to start rate limiter.");
+        }
+    } else {
+        LOG_ERROR("Unable to allocate rate limiter.");
+    }
 
     return true;
 }
@@ -76,8 +82,11 @@ void SimpleHttpServer::operator()() {
         
         // Handle the connected user's HTTP request
         ClientResponder clientResponder;
-        clientResponder.start(client_socket, rateLimiter);
-        spawnedThreads.push_back(clientResponder.getMyThread());
+        if (clientResponder.start(client_socket, rateLimiter) == false) {
+            LOG_ERROR("Unable to start the client responder.");
+        } else {
+            spawnedThreads.push_back(clientResponder.getMyThread());
+        }
     }
 }
 
@@ -126,6 +135,9 @@ void ClientResponder::operator()()
         return;
     }
 
+    // It would be more efficient to store the peernames as numerical IP addresses but
+    // converting the addresses to strings made the implementation easier.
+    
     isRateLimited = rateLimiter->checkLimit(peername, type);
     
     // Basic HTTP response payload
