@@ -50,11 +50,13 @@ int main()
     LOG_INFO("Service up and running...");
 
     if (initSignalHandler() == false) {
-        return 1;
+        exit(1);
     }
     
     Dbclient dbclient;
-    dbclient.createTable();
+    if (dbclient.createTable() == false) {
+        exit(1);
+    }
     
     fetcher = new Fetcher();
     fetcher->start();
@@ -65,7 +67,7 @@ int main()
     } else {
         LOG_ERROR("Unable to start http server.");
         fetcher->stop();
-        return 1;
+        exit(1);
     }
 
 

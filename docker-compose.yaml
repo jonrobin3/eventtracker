@@ -22,7 +22,7 @@ services:
         - botnet
 
   web-app:
-    image: jonrobin2/event-tracker:r1
+    image: jonrobin2/event-tracker:r2
     container_name: event-tracker
     depends_on:
       - db

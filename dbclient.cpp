@@ -86,7 +86,7 @@ bool Dbclient::createTable()
     PGresult *res = NULL;
 
     if (PQstatus(conn) != CONNECTION_OK) {
-        Logger::getInstance().log(LogLevel::ERROR, "postgres connection failed: %s", PQerrorMessage(conn));
+        LOG_ERROR("postgres connection failed.");
         return false;
     }
 
